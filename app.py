@@ -6,11 +6,11 @@ from facenet_pytorch import MTCNN
 from fer import FER
 from imagehash import phash
 
-# Initialize MTCNN and FER models
+ 
 mtcnn = MTCNN(keep_all=True)
 emotion_detector = FER()
 
-# Quality assessment functions
+ 
 def calculate_brightness(image):
     grayscale_image = image.convert("L")
     np_image = np.array(grayscale_image)
@@ -87,7 +87,7 @@ def calculate_aspect_ratio(image):
     width, height = image.size
     return width / height
 
-# Duplicate detection function
+ 
 def find_duplicates(images, threshold=10):
     duplicates = []
     image_hashes = {}
@@ -103,14 +103,14 @@ def find_duplicates(images, threshold=10):
 
     return duplicates
 
-# Streamlit app
+ 
 st.title("Image Quality Assessment")
 st.write("Upload a folder of images")
 
-# Directory input
+ 
 directory = st.text_input("Enter the folder path containing images:", "")
 
-# Sidebar toggles for quality criteria
+ 
 st.sidebar.header("Select Criteria to Apply")
 apply_brightness = st.sidebar.checkbox("Apply Brightness", True)
 apply_contrast = st.sidebar.checkbox("Apply Contrast", True)
@@ -119,7 +119,7 @@ apply_saturation = st.sidebar.checkbox("Apply Saturation", True)
 apply_temperature = st.sidebar.checkbox("Apply Temperature", True)
 apply_highlights_shadows = st.sidebar.checkbox("Apply Highlights & Shadows", True)
 
-# Sliders for quality criteria
+ 
 if apply_brightness:
     brightness_threshold = st.sidebar.slider("Minimum Brightness", 0, 255, 100)
 if apply_contrast:
@@ -134,17 +134,17 @@ if apply_highlights_shadows:
     highlights_threshold = st.sidebar.slider("Minimum Highlights", 0, 255, 200)
     shadows_threshold = st.sidebar.slider("Maximum Shadows", 0, 255, 50)
 
-# Face count checkbox and input
+ 
 count_faces_checkbox = st.sidebar.checkbox("Filter by Face Count", True)
 if count_faces_checkbox:
     face_count = st.sidebar.number_input("Select Number of Faces in Image", min_value=1, value=1)
 else:
     face_count = 0
 
-# Enable emotion detection checkbox
+ 
 enable_emotion_detection = st.sidebar.checkbox("Enable Emotion Detection", True)
 
-# Emotion detection options if enabled
+ 
 if enable_emotion_detection:
     st.sidebar.header("Select Emotions to Detect")
     emotions_to_detect = st.sidebar.multiselect(
@@ -155,10 +155,10 @@ if enable_emotion_detection:
 else:
     emotions_to_detect = []
     
-# Aspect Ratio Optimizer
+ 
 enable_aspect_ratio_optimizer = st.sidebar.checkbox("Enable Aspect Ratio Optimization", True)
 
-# Aspect Ratio Optimizer logic
+ 
 if enable_aspect_ratio_optimizer:
     st.sidebar.header("Aspect Ratio Optimizer")
     aspect_ratio_options = [
@@ -174,21 +174,21 @@ if enable_aspect_ratio_optimizer:
 else:
     selected_aspect_ratio = None  
 
-# Duplicate detection settings
+ 
 st.sidebar.header("Duplicate Detection Settings")
 enable_duplicate_detection = st.sidebar.checkbox("Enable Duplicate Detection", True)
 similarity_threshold = st.sidebar.slider("Similarity Threshold", 1, 20, 10)
 
-# Process images if directory path is valid
+ 
 if directory:
     try:
-        # Load images from directory
+         
         image_files = [f for f in os.listdir(directory) if f.lower().endswith((".png", ".jpg", ".jpeg"))]
         images = {file: Image.open(os.path.join(directory, file)) for file in image_files}
         image_data = []
 
         for file, image in images.items():
-            # Calculate quality metrics conditionally
+             
             brightness = calculate_brightness(image) if apply_brightness else None
             contrast = calculate_contrast(image) if apply_contrast else None
             sharpness = calculate_sharpness(image) if apply_sharpness else None
@@ -199,17 +199,17 @@ if directory:
             
             if enable_aspect_ratio_optimizer:
                 aspect_ratio = calculate_aspect_ratio(image)
-                # Convert selected aspect ratio to float
+                 
                 selected_ratio = float(selected_aspect_ratio.split(":")[0]) / float(selected_aspect_ratio.split(":")[1])
-                # Check if the aspect ratio matches the user's selection
+                 
                 aspect_ratio_matches = abs(aspect_ratio - selected_ratio) < 0.01
             else:
                 aspect_ratio_matches = True
 
-            # Detect emotions if enabled
+             
             emotion_data = detect_emotions(os.path.join(directory, file)) if enable_emotion_detection else []
 
-            # Check if the image meets the thresholds
+             
             criteria_pass = (
                 (not apply_brightness or brightness >= brightness_threshold)
                 and (not apply_contrast or contrast >= contrast_threshold)
@@ -221,7 +221,7 @@ if directory:
                 and aspect_ratio_matches 
             )
 
-            # Check for selected emotions in the detected emotions
+             
             emotions_detected = [emotion["emotions"] for emotion in emotion_data if "emotions" in emotion]
             emotion_matches = (
                 (
@@ -250,7 +250,7 @@ if directory:
                     "emotions": emotions_detected,
                 })
 
-        # Duplicate detection if enabled
+         
         if enable_duplicate_detection:
             duplicate_pairs = find_duplicates(images, similarity_threshold)
             if duplicate_pairs:
@@ -268,7 +268,7 @@ if directory:
             else:
                 st.write("No duplicates found within the specified similarity threshold.")
 
-        # Display filtered images that meet the thresholds
+         
         if image_data:
             st.subheader("Images that Meet Quality and Emotion Criteria")
             for data in image_data:
